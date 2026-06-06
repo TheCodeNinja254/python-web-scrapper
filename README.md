@@ -86,10 +86,8 @@ This step copies all the project files onto your computer.
 
 3. Now download the project by typing:
    ```
-   git clone https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
+   git clone https://github.com/TheCodeNinja254/python-web-scrapper.git
    ```
-   *(Replace `YOUR-USERNAME/YOUR-REPO-NAME` with the actual GitHub link for this project)*
-
 4. Press Enter. You'll see files being downloaded. When it finishes, a new folder will appear in your Documents.
 
 5. Move into the project folder:
