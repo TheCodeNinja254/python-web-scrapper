@@ -181,6 +181,23 @@ When it completes, you'll see:
 ✅  Saved 847 facilities → manitoba_childcare.xlsx
 ```
 
+### Option C — Diagnose Mode
+
+In the event of an error, run the below command to have the script attempt to figure out what could have gone wrong.
+
+1. In the PyCharm Terminal, type:
+   ```
+   python mb_childcare_scraper.py --diagnose
+   ```
+2. You'll see messages like:
+   ```
+   🔬  DIAGNOSE MODE — inspecting API response structure 
+   🌐  Opening browser to establish session...
+   ⏳  Waiting for page to fully load and fire API calls (20s)...
+   ```
+3. When it finishes, a series of errors will be shown on the screen, reach out to me for further checks.
+
+
 ---
 
 ## 📊 What's in the Excel File?
