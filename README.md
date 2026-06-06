@@ -138,6 +138,10 @@ The project needs two extra Python libraries. Let's install them using PyCharm's
    ```
    This downloads a small version of the Chrome browser. It may take a minute or two.
 
+5. Now install requests. Type this and press Enter:
+   ```
+   pip install requests
+   ```
 ---
 
 ## ▶️ Step 8 — Run the Scraper
