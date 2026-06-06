@@ -48,8 +48,6 @@ BROWSER_UA = (
     "Chrome/124.0.0.0 Safari/537.36"
 )
 
-# ── Exact payload format the site uses (captured from browser network tab) ──
-# All searchBy* fields set to true = search across all fields, no keyword filter
 SEARCH_PAYLOAD = {
     "searchValue": "",
     "sortValue": "Facility Name - Ascending",
@@ -92,11 +90,6 @@ SEARCH_PAYLOAD = {
     "pageSize": 10000,  # request all records at once
 }
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Session setup — loads the page in a real browser to get cookies + CSRF token
-# ─────────────────────────────────────────────────────────────────────────────
-
 def get_session(headed=False):
     """
     Visit the site in a headless browser to collect:
@@ -135,7 +128,7 @@ def get_session(headed=False):
             page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             page.wait_for_timeout(5000)
         except Exception as e:
-            print(f"  ⚠️  Navigation warning: {e}")
+            print(f" Navigation warning: {e}")
 
         # Collect cookies
         for c in ctx.cookies():
@@ -163,16 +156,11 @@ def get_session(headed=False):
         browser.close()
 
     print(f"  Cookies collected: {list(cookies_out.keys()) or 'none'}")
-    print(f"  CSRF token: {'found ✅' if csrf_token else 'not found (will try without)'}")
+    print(f"  CSRF token: {'found ' if csrf_token else 'not found (will try without)'}")
     if captured_payload:
-        print(f"  Live payload captured ✅ ({len(captured_payload)} fields)")
+        print(f"  Live payload captured  ({len(captured_payload)} fields)")
 
     return cookies_out, csrf_token, captured_payload
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# API call
-# ─────────────────────────────────────────────────────────────────────────────
 
 def call_api(cookies: dict, csrf_token: str | None, payload: dict) -> dict | list | None:
     """POST to SearchChildCareFacilities and return parsed JSON."""
@@ -203,13 +191,8 @@ def call_api(cookies: dict, csrf_token: str | None, payload: dict) -> dict | lis
             print(f"  Error response: {resp.text[:300]}")
             return None
     except Exception as e:
-        print(f"  ❌  Request failed: {e}")
+        print(f" Request failed: {e}")
         return None
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Parse API response → list of flat facility dicts
-# ─────────────────────────────────────────────────────────────────────────────
 
 def parse_facilities(data) -> list:
     """
@@ -316,11 +299,6 @@ def flatten_facility(r: dict) -> dict:
         "Scraped At": datetime.now().strftime("%Y-%m-%d %H:%M"),
     }
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Diagnose mode
-# ─────────────────────────────────────────────────────────────────────────────
-
 def run_diagnose():
     print("\n🔬  DIAGNOSE MODE\n")
     cookies, csrf, live_payload = get_session()
@@ -334,11 +312,11 @@ def run_diagnose():
     data = call_api(cookies, csrf, payload)
 
     if data is None:
-        print("\n❌  API returned an error.")
+        print("\n  API returned an error.")
         return
 
     # Show structure
-    print(f"\n✅  Response type: {type(data).__name__}")
+    print(f"\n  Response type: {type(data).__name__}")
     if isinstance(data, dict):
         print(f"   Top-level keys: {list(data.keys())}")
         for k, v in data.items():
@@ -360,16 +338,11 @@ def run_diagnose():
 
     # Try parsing
     facilities = parse_facilities(data)
-    print(f"\n✅  parse_facilities() found: {len(facilities)} facilities")
+    print(f"\n  parse_facilities() found: {len(facilities)} facilities")
     if facilities:
         print(f"\n   Sample parsed row:\n{json.dumps(facilities[0], indent=4)[:1000]}")
     else:
-        print("   ⚠️  0 facilities parsed — check diagnose_response.json and share it.")
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Excel writer
-# ─────────────────────────────────────────────────────────────────────────────
+        print("     0 facilities parsed — check diagnose_response.json and share it.")
 
 COLUMNS = [
     "Facility ID", "Facility Name", "Facility Type", "Business Type",
@@ -447,7 +420,7 @@ def write_excel(facilities: list, output_path: str):
                                                                                             size=9)
 
     wb.save(output_path)
-    print(f"\n✅  Saved {len(facilities)} facilities → {output_path}")
+    print(f"\n  Saved {len(facilities)} facilities → {output_path}")
 
 
 def _add_instructions_sheet(wb):
@@ -471,11 +444,6 @@ def _add_instructions_sheet(wb):
         info[f"A{i}"] = s
         info[f"A{i}"].font = Font(name="Arial", size=10)
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Main
-# ─────────────────────────────────────────────────────────────────────────────
-
 def main():
     parser = argparse.ArgumentParser(description="Manitoba Child Care Scraper")
     parser.add_argument("--test", action="store_true", help="Only save first 10 facilities")
@@ -489,10 +457,10 @@ def main():
         return
 
     mode = "TEST (10 facilities)" if args.test else "FULL (all Manitoba)"
-    print(f"\n🔍  Manitoba Child Care Scraper — {mode}")
+    print(f"\n  Manitoba Child Care Scraper — {mode}")
     print(f"    Output: {args.output}\n")
 
-    # ── Step 1: Get session ──────────────────────────────────────────────────
+    # ── Step 1: Get session 
     print("Step 1/3 — Establishing browser session...")
     cookies, csrf, live_payload = get_session(headed=args.headed)
 
@@ -500,25 +468,25 @@ def main():
     # otherwise fall back to our hardcoded known-good payload
     payload = live_payload or SEARCH_PAYLOAD
     if live_payload:
-        print("  Using live-captured payload ✅")
+        print("  Using live-captured payload ")
     else:
         print("  Using built-in payload (live capture not available)")
 
-    # ── Step 2: Call the API ─────────────────────────────────────────────────
+    # ── Step 2: Call the API 
     print("\nStep 2/3 — Calling search API...")
     data = call_api(cookies, csrf, payload)
 
     if data is None:
-        print("\n❌  API call failed.")
+        print("\n  API call failed.")
         print("    Run:  python mb_childcare_scraper.py --diagnose")
         sys.exit(1)
 
-    # ── Step 3: Parse + write Excel ──────────────────────────────────────────
+    # ── Step 3: Parse + write Excel 
     print("\nStep 3/3 — Parsing results...")
     facilities = parse_facilities(data)
 
     if not facilities:
-        print("❌  API returned data but 0 facilities could be parsed from it.")
+        print("  API returned data but 0 facilities could be parsed from it.")
         print("    Run:  python mb_childcare_scraper.py --diagnose")
         print("    This saves diagnose_response.json — share it and we can fix the parser.")
         sys.exit(1)
@@ -527,7 +495,7 @@ def main():
         facilities = facilities[:10]
         print(f"    [TEST] Limited to {len(facilities)} facilities")
 
-    print(f"    {len(facilities)} facilities parsed ✅")
+    print(f"    {len(facilities)} facilities parsed ")
     write_excel(facilities, args.output)
 
 
